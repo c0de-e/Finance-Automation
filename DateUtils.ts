@@ -1,7 +1,7 @@
 /**
  * Appends the current date to the supplied value
  * @param val The value to modify
- * @param range The range to m,odify
+ * @param range The range to modify
  */
 function AppendDate(val: string, range: GoogleAppsScript.Spreadsheet.Range): void {
   val = `${val} (${new Date().toLocaleDateString()})`.replace('+', '');

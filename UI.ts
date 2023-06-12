@@ -1,5 +1,5 @@
 /**
- * 
+ * Runs on SpreadSheet open; Sets up UI
  * @param e 
  */
 function onOpen(e: GoogleAppsScript.Events.SheetsOnOpen) {
@@ -12,7 +12,7 @@ function onOpen(e: GoogleAppsScript.Events.SheetsOnOpen) {
 }
 
 /**
- * 
+ * Runs when editing a cell value
  * @param e 
  */
 function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {

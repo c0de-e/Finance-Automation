@@ -1,4 +1,5 @@
 const BILLSLABEL = "Bills";
+const MAXBILLCOUNT = 3;
 
 interface Bill {
     AmountDue: string;
@@ -13,12 +14,21 @@ enum BillSource {
     Xfinity = "Xfinity"
 }
 
-function test() {
-    console.log(GetLastestBills());
-}
-
+/**
+ * Gets the active cell and sets a 2x3 with the grabbed bills data 
+ */
 function setBillData_() {
-    
+    let spreadSheet = SpreadsheetApp.getActiveSheet();
+    let activeCell = spreadSheet.getActiveCell();
+    let activeRange = spreadSheet.getRange(activeCell.getLastRow(), activeCell.getLastColumn(), MAXBILLCOUNT, 2);
+    let rangeValues = activeRange.getValues();
+
+    let bills = GetLastestBills()?.sort((a, b) => a.BillSource.localeCompare(b.BillSource)) as Array<Bill>;
+    rangeValues.forEach((row, index) => {
+        row[ 0 ] = `${bills[ index ].BillSource} (${bills[ index ].PaymentDate?.toDateString()})`;
+        row[ 1 ] = `=${bills[ index ].AmountDue.replace('$', '')}/2`;
+    });
+    activeRange.setValues(rangeValues);
 }
 
 /**
@@ -27,14 +37,14 @@ function setBillData_() {
  */
 function GetLastestBills(): Array<Bill> | undefined {
     let billsLabel = GmailApp.getUserLabels().find(label => label.getName() == BILLSLABEL);
-    return billsLabel?.getThreads(0, 3)
+    return billsLabel?.getThreads(0, MAXBILLCOUNT)
         .map(thread => {
             // Gets first email in thread
             let message = thread.getMessages()[ 0 ];
             let amountDue = parseAmountDue_(message.getRawContent());
             let billSource = parseBillSource_(message.getFrom());
 
-            console.log(`AMOUNT DUE: ${amountDue}\n${message.getFrom()}`);
+            console.log(`AMOUNT DUE: ${amountDue}\nFROM: ${message.getFrom()}`);
 
             let paymentDate: Date | null = null;
             if (billSource != null)
