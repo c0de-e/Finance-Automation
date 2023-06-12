@@ -1,5 +1,5 @@
 function onOpen(e) {
-  let ui = SpreadsheetApp.getUi()
+  let ui = SpreadsheetApp.getUi();
   ui.alert("Reminder!!!", `Use '+' to auto-add date 😄`, ui.ButtonSet.OK);
   ui.createMenu('Automation')
     .addItem('Append Date To Selected Range', 'AppendDateToSelectedRange')
@@ -29,6 +29,6 @@ function AppendDateToSelectedRange() {
   var selectedRange = activeSheet.getActiveRange();
   var modifiedVals = selectedRange.getValues()
     .map(row =>
-      row.map(cellVal => `${cellVal} (${date})`.replace('+', '')))
+      row.map(cellVal => `${cellVal} (${date})`.replace('+', '')));
   selectedRange.setValues(modifiedVals);
 }
