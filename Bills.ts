@@ -1,4 +1,5 @@
 const BILLSLABEL = "Bills";
+
 interface Bill {
     AmountDue: string;
     BillSource: BillSource;
@@ -6,8 +7,18 @@ interface Bill {
     PaymentDate?: Date;
 }
 
+enum BillSource {
+    Dominion = "Dominion",
+    Lehi_City = "Lehi City",
+    Xfinity = "Xfinity"
+}
+
 function test() {
     console.log(GetLastestBills());
+}
+
+function setBillData_() {
+    
 }
 
 /**
@@ -86,10 +97,4 @@ function parsePaymentDate_(emailBody: string, billSource: BillSource): Date {
         else if (char == "\n") break;
     };
     return new Date(dateStr);
-}
-
-enum BillSource {
-    Dominion = "Dominion",
-    Lehi_City = "Lehi City",
-    Xfinity = "Xfinity"
 }
