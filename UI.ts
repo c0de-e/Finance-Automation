@@ -8,6 +8,7 @@ function onOpen(e: GoogleAppsScript.Events.SheetsOnOpen) {
     ui.createMenu('Automation')
         .addItem('Append Date To Selected Range', 'AppendDateToSelectedRange')
         .addItem('Set Bill Data At Selected Range', 'setBillData_')
+        .addItem('Sort Selected Range By Date\n(First column should have date between parenthesis)', 'sortRangeByDate_')
         .addToUi();
 }
 
