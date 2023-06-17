@@ -61,7 +61,7 @@
         if (action == google.picker.Action.PICKED) {
           var doc = data[google.picker.Response.DOCUMENTS][0];
           var id = doc[google.picker.Document.ID];
-          google.script.run.withSuccessHandler(folderInserted).withFailureHandler(showError).SetCachedId(id);
+          google.script.run.withSuccessHandler(folderInserted).withFailureHandler(showError).ImportSmithsReciept(id);
         } else if (action == google.picker.Action.CANCEL) {
           google.script.host.close();
         }
