@@ -5,11 +5,18 @@
 function onOpen(e: GoogleAppsScript.Events.SheetsOnOpen) {
     let ui = SpreadsheetApp.getUi();
     ui.alert("Reminder!!!", `Use '+' to auto-add date 😄`, ui.ButtonSet.OK);
-    ui.createMenu('Automation')
+    let automationMenu = ui.createMenu('Automation');
+    automationMenu
         .addItem('Append Date To Selected Range', 'AppendDateToSelectedRange')
         .addItem('Set Bill Data At Selected Range', 'setBillData_')
         .addItem('Sort Selected Range By Date\n(First column should have date between parenthesis)', 'sortRangeByDate_')
         .addItem('Import Smiths Reciept', 'showPDFPicker')
+        .addToUi();
+
+    ui.createAddonMenu()
+        .addSubMenu(automationMenu)
+        .addSeparator()
+        .addItem("Apply formula to selected", "MultiFormulaDialog")
         .addToUi();
 }
 

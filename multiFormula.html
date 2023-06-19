@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Add the standard Google Style Sheet. -->
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css" />
+    <script>
+      function getFormula() {
+        var formula = document.getElementById("formula").value;
+        google.script.run.withSuccessHandler(closeDialog).withFailureHandler(showError).MultiFormula(formula);
+      }
+      function closeDialog() {
+        google.script.host.close();
+      }
+      function showError(message) {
+        document.getElementById("result").innerHTML = "Error: " + message;
+      }
+    </script>
+  </head>
+  <body>
+    <div>
+      <div>Use "#CELL" to denote a cell's current value</div>
+      <input id="formula" type="text" value="=#CELL/2" />
+      <input type="submit" onclick="getFormula()" />
+    </div>
+  </body>
+</html>
