@@ -8,12 +8,41 @@
         var formula = document.getElementById("formula").value;
         google.script.run.withSuccessHandler(closeDialog).withFailureHandler(showError).MultiFormula(formula);
       }
+
       function closeDialog() {
         google.script.host.close();
       }
+
       function showError(message) {
         document.getElementById("result").innerHTML = "Error: " + message;
       }
+
+      /** @param  {Object} vals */
+      function updatePreview(vals) {
+        console.log("Vals", vals);
+        if (vals == null) return;
+        const preview = document.getElementById("preview");
+        if (vals.size == preview.children.length) return;
+        preview.textContent = "";
+
+        for (const key in vals) {
+          var li = document.createElement("li");
+          li.textContent = key;
+          let ul = document.createElement("ul");
+          vals[key].forEach((cell) => {
+            let child_li = document.createElement("li");
+            child_li.textContent = cell;
+            ul.appendChild(child_li);
+          });
+          li.appendChild(ul);
+          preview.appendChild(li);
+        }
+      }
+
+      setInterval(() => {
+        var formula = document.getElementById("formula");
+        console.log(google.script.run.withSuccessHandler(updatePreview).EvaluateSelectionValues(formula.value));
+      }, 1000);
     </script>
   </head>
   <body>
@@ -21,6 +50,8 @@
       <div>Use "#CELL" to denote a cell's current value</div>
       <input id="formula" type="text" value="=#CELL/2" />
       <input type="submit" onclick="getFormula()" />
+      <h4>Preview</h4>
+      <ul id="preview"></ul>
     </div>
   </body>
 </html>
