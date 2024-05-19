@@ -1,5 +1,5 @@
 const BILLSLABEL = "Bills";
-const MAXBILLCOUNT = 3;
+const MAXBILLCOUNT = 30;
 
 interface Bill {
     AmountDue: string;
@@ -20,10 +20,11 @@ enum BillSource {
 function setBillData_() {
     let spreadSheet = SpreadsheetApp.getActiveSheet();
     let activeCell = spreadSheet.getActiveCell();
-    let activeRange = spreadSheet.getRange(activeCell.getLastRow(), activeCell.getLastColumn(), MAXBILLCOUNT, 2);
+    let activeRange = spreadSheet.getRange(activeCell.getLastRow(), activeCell.getLastColumn(), Object.values(BillSource).length, 2);
     let rangeValues = activeRange.getValues();
 
     let bills = GetLastestBills()?.sort((a, b) => a.BillSource.localeCompare(b.BillSource)) as Array<Bill>;
+
     rangeValues.forEach((row, index) => {
         row[ 0 ] = `${bills[ index ].BillSource} (${bills[ index ].PaymentDate?.toDateString()})`;
         row[ 1 ] = `=${bills[ index ].AmountDue.replace('$', '')}/2`;
@@ -32,26 +33,24 @@ function setBillData_() {
 }
 
 /**
- * Grabs the latest 3 bills, under the Bills label in gmail
+ * Grabs the latest BillSource bills, under the Bills label in gmail
  * @returns The lastest bill data
  */
 function GetLastestBills(): Array<Bill> | undefined {
     let billsLabel = GmailApp.getUserLabels().find(label => label.getName() == BILLSLABEL);
-    return billsLabel?.getThreads(0, MAXBILLCOUNT)
-        .map(thread => {
-            // Gets first email in thread
-            let message = thread.getMessages()[ 0 ];
-            let amountDue = parseAmountDue_(message.getRawContent());
-            let billSource = parseBillSource_(message.getFrom());
+    const threads = billsLabel?.getThreads(0, MAXBILLCOUNT);
+    return Object.values(BillSource).map((billSource: BillSource) => {
+        const sourceThread = threads?.find(thread => parseBillSource_(thread.getMessages()[ 0 ].getFrom()) == billSource) as GoogleAppsScript.Gmail.GmailThread;
 
-            console.log(`AMOUNT DUE: ${amountDue}\nFROM: ${message.getFrom()}`);
+        // Gets first email in thread
+        let message = sourceThread.getMessages()[ 0 ];
+        let amountDue = parseAmountDue_(message.getRawContent());
+        let paymentDate = parsePaymentDate_(message.getPlainBody(), billSource);
 
-            let paymentDate: Date | null = null;
-            if (billSource != null)
-                paymentDate = parsePaymentDate_(message.getPlainBody(), billSource as BillSource);
+        console.log(`AMOUNT DUE: ${amountDue}\nFROM: ${message.getFrom()}`);
 
-            return { AmountDue: amountDue, BillSource: billSource, From: message.getFrom(), PaymentDate: paymentDate } as Bill;
-        });
+        return { AmountDue: amountDue, BillSource: billSource, From: message.getFrom(), PaymentDate: paymentDate } as Bill;
+    });
 }
 
 /**
@@ -89,7 +88,7 @@ function parsePaymentDate_(emailBody: string, billSource: BillSource): Date {
     let parseTerm: string;
     switch (billSource) {
         case BillSource.Dominion:
-            parseTerm = "Bank Payment ";
+            parseTerm = "Payment Due: ";
             break;
         case BillSource.Lehi_City:
             parseTerm = "Payment Scheduled for:   ";
