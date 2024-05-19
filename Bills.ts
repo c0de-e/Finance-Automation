@@ -1,3 +1,4 @@
+const CALENDARNAME = "Bill Auto Pay";
 const BILLSLABEL = "Bills";
 const MAXBILLCOUNT = 30;
 
@@ -106,4 +107,36 @@ function parsePaymentDate_(emailBody: string, billSource: BillSource): Date {
         else if (char == "\n") break;
     };
     return new Date(dateStr);
+}
+
+function addBillCalandarEvents_() {
+    ScriptApp.
+        newTrigger("addCalendarEventTrigger_")
+        .timeBased()
+        .everyHours(24)
+        .create();
+}
+
+function addCalendarEventTrigger_() {
+    // Get the latest bills and filter for the ones we want to create an event for
+    let bills = GetLastestBills()?.sort((a, b) => a.BillSource.localeCompare(b.BillSource)) as Array<Bill>;
+    bills = bills.filter(bill => bill.BillSource != BillSource.Xfinity);
+
+    // Get the calandar if it exists, if not, create it
+    const calendars = CalendarApp.getCalendarsByName(CALENDARNAME);
+    if (calendars.length == 0) calendars.push(CalendarApp.createCalendar(CALENDARNAME, { color: "MUSTARD" }));
+
+    bills.forEach(bill => {
+        calendars.forEach(calendar => {
+            const existingEvents = calendar.getEventsForDay(bill.PaymentDate as Date);
+            const eventTitle = `${bill.BillSource} Bill Due`;
+            // If the event exists, don't create it again
+            if (existingEvents.some(event => event.getTitle() == eventTitle)) return;
+
+            const newEvent = calendar.createAllDayEvent(eventTitle, bill.PaymentDate as Date);
+            newEvent.setDescription(`The amount of ${bill.AmountDue} is due`);// @ts-ignore
+            newEvent.setColor(CalendarApp.EventColor.PALE_GREEN);
+            newEvent.addPopupReminder(420);
+        });
+    });
 }

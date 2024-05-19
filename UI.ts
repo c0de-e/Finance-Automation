@@ -17,6 +17,7 @@ function onOpen(e: GoogleAppsScript.Events.SheetsOnOpen) {
         .addSubMenu(automationMenu)
         .addSeparator()
         .addItem("Apply formula to selected", "MultiFormulaDialog")
+        .addItem("Add billing calendar events (Dominion and Xpress Bill Pay)", "addBillCalandarEvents_")
         .addToUi();
 }
 
