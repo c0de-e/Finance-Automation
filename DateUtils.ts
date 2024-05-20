@@ -38,12 +38,21 @@ function sortRangeByDate_(range: GoogleAppsScript.Spreadsheet.Range) {
   if (range == null) range = SpreadsheetApp.getActiveSheet().getActiveRange() as GoogleAppsScript.Spreadsheet.Range;
   // Regex to grab everything between parenthesis
   var regExp = /\(([^)]+)\)/;
-  let rangeVals = range.getValues();
 
-  rangeVals.sort((a, b) => {
+  let dateRange = SpreadsheetApp.getActiveSheet().getRange(range.getRow(), range.getColumn(), range.getNumRows(), 1);
+  let dateVals = dateRange.getValues();
+
+  let formulasRange = SpreadsheetApp.getActiveSheet().getRange(range.getRow(), range.getLastColumn(), range.getNumRows(), 1);
+  let formulasVals = formulasRange.getFormulas();
+  let formulasValsVals = formulasRange.getValues();
+  formulasVals.forEach((fv, index) => { if (fv[ 0 ] == "") fv[ 0 ] = formulasValsVals[ index ][ 0 ]; });
+
+  let mapping = dateVals.map((date, index) => { return { date: date, formula: formulasVals[ index ] }; });
+
+  mapping.sort((a, b) => {
     // Try to match dates between parenthesis in fist column
-    let matchA = regExp.exec(a[ 0 ]);
-    let matchB = regExp.exec(b[ 0 ]);
+    let matchA = regExp.exec(a.date[ 0 ]);
+    let matchB = regExp.exec(b.date[ 0 ]);
 
     // Puts items without dates at the top
     if (matchA == null && matchB != null) return -1;
@@ -55,5 +64,6 @@ function sortRangeByDate_(range: GoogleAppsScript.Spreadsheet.Range) {
     let dateB = new Date((matchB as RegExpExecArray)[ 1 ]);
     return dateA.getTime() - dateB.getTime();
   });
-  range.setValues(rangeVals);
+  dateRange.setValues(mapping.map(m => m.date));
+  formulasRange.setValues(mapping.map(m => m.formula));
 }
